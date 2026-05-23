@@ -1,69 +1,35 @@
-const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
-
-const app = express();
+var express = require('express');
+var cors = require('cors');
+var axios = require('axios');
+var app = express();
 app.use(cors());
 
-const JIKAN = 'https://api.jikan.moe/v4';
-
-app.get('/', (req, res) => {
-  res.json({ message: 'Voxa Anime API' });
+app.get('/', function(req, res) {
+  res.json({message: 'Voxa Anime API'});
 });
 
-app.get('/search', async (req, res) => {
-  try {
-    const q = req.query.q;
-    const r = await axios.get(`${JIKAN}/anime?q=${encodeURIComponent(q)}&limit=12`);
-    res.json(r.data.data);
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
+app.get('/popular', function(req, res) {
+  axios.get('https://api.jikan.moe/v4/top/anime?limit=12')
+  .then(function(r) { res.json(r.data.data); })
+  .catch(function(e) { res.json([]); });
 });
 
-app.get('/popular', async (req, res) => {
-  try {
-    const r = await axios.get(`${JIKAN}/top/anime?filter=bypopularity&limit=12`);
-    res.json(r.data.data);
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
+app.get('/recent', function(req, res) {
+  axios.get('https://api.jikan.moe/v4/seasons/now?limit=12')
+  .then(function(r) { res.json(r.data.data); })
+  .catch(function(e) { res.json([]); });
 });
 
-app.get('/recent', async (req, res) => {
-  try {
-    const r = await axios.get(`${JIKAN}/seasons/now?limit=12`);
-    res.json(r.data.data);
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
+app.get('/search', function(req, res) {
+  axios.get('https://api.jikan.moe/v4/anime?q=' + req.query.q + '&limit=12')
+  .then(function(r) { res.json(r.data.data); })
+  .catch(function(e) { res.json([]); });
 });
 
-app.get('/info/:id', async (req, res) => {
-  try {
-    const r = await axios.get(`${JIKAN}/anime/${req.params.id}/episodes`);
-    res.json(r.data.data);
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
+app.get('/info/:id', function(req, res) {
+  axios.get('https://api.jikan.moe/v4/anime/' + req.params.id + '/episodes')
+  .then(function(r) { res.json(r.data.data); })
+  .catch(function(e) { res.json([]); });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Anime API running on port ' + PORT));    res.json(r.data.data);
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Anime API running on port ${PORT}`));    res.json(results);
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get('/stream/:episodeId', async (req, res) => {
-  try {
-    const results = await anigo.getGogoanimeEpisodeSource(req.params.episodeId);
-    res.json(results);
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Anime API running on port ${PORT}`));
+app.listen(process.env.PORT || 3000);
